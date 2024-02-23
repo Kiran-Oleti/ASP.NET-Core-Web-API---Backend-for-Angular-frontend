@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Registration.Data;
 using Registration.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 
 namespace Registration.Controllers
@@ -40,42 +41,19 @@ namespace Registration.Controllers
 
             if (user != null)
             {
-                return Ok(new { message = "Login successful!" });
+                return Ok(new { message = "Login successful!", username = user.Username, email = user.Email });
             }
 
             return Unauthorized(new { error = "Invalid login credentials." });
         }
-        [HttpGet("user/details")]
-        public async Task<IActionResult> GetUserDetails()
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
         {
-            var userId = GetUserIdFromToken();
+            // Perform any necessary logout actions
+            // For example, clearing authentication cookies or tokens
 
-            if (userId == null)
-            {
-                return Unauthorized(new { error = "Invalid or missing token." });
-            }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user != null)
-            {
-                return Ok(user);
-            }
-
-            return NotFound(new { error = "User details not found." });
+            return Ok(new { message = "Logout successful" });
         }
-        private int? GetUserIdFromToken()
-        {
-            var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
-            {
-                return userId;
-            }
-
-            return null;
-        }
-
 
     }
 }
